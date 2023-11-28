@@ -1,5 +1,6 @@
 <?php
 include_once("helpers/headers.php");
+include_once("helpers/validation.php");
 global $Link;
 header("Content-type: application/json");
 function getData($method)
