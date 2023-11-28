@@ -1,7 +1,7 @@
 <?php
 function validateStringNoteLess($string, $lenght) 
 {
-    if (strlen($string) > $lenght) 
+    if ($string > $lenght) 
     {
         return true;
     }
