@@ -34,13 +34,12 @@ if (!$Link)
     setHTTPStatus('500','DB connetion error'.mysqli_connect_errno());
     exit;
 }
+$formData = getData(getMethod());
+$method = getMethod();
 $url = isset($_GET['q']) ? $_GET['q'] :'';
 $url = rtrim($url,'/');
 $urlList = explode('/', $url);
-
 $routers = $urlList[0];
-$formData = getData(getMethod());
-$method = getMethod();
 if(file_exists(realpath(dirname(__FILE__)). '/routers/' . $routers .'.php'))
 {
     include_once 'routers/' . $routers .'.php';

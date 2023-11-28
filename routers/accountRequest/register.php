@@ -1,48 +1,51 @@
 <?php
-function accountRegistr($formData)
+function accountRegister($formData)
 {
     global $Link;
     $flag = true;
     $user = $Link->query("SELECT id from account where email='$formData->email'")->fetch_assoc();
     if(is_null($user))
     {
-        if(!validateStringNoteLess($formData->fullname))
+        // if(!validateStringNoteLess($formData->fullname,1))
+        // {
+        //     $flag = false;
+        //     setHTTPStatus("400","FullName very short, minimum leght 1");
+        //     return;
+        // }
+        // if(!validateStringNoteLess($formData->email,1) || !validateEmail($formData->email))
+        // {
+        //     $flag = false;
+        //     setHTTPStatus("400","Email very short, minimum leght 1. Or this email not correct");
+        //     return;
+        // }
+        // if(!validateStringNoteLess($formData->password,6))
+        // {
+        //     $flag = false;
+        //     setHTTPStatus("400","Password very short, minimum leght 6");
+        //     return;
+        // }
+        // if(!validateGender($formData->gender))
+        // {
+        //     $flag = false;
+        //     setHTTPStatus("400","Gender is not correct");
+        //     return;
+        // }
+        $password = hash("sha1", $formData->password);
+        $birth = new DateTime($formData->birthday);
+        $birthday = $birth->format("Y-m-d H:i:s");
+        $userIsertResalt = $Link->query("INSERT INTO `account`(`fullName`, `password`, `email`, `gender`, `phoneNumber`,`birthDate`) VALUES('$formData->fullName','$password','$formData->email','$formData->gender','$formData->phoneNumber','$birthday')");
+        if(!$userIsertResalt)
         {
-            $flag = false;
-            setHTTPStatus("400","FullName very short, minimum leght 1");
-            return;
+            setHTTPStatus("400","$Link->error");
         }
-        if(!validateStringNoteLess($formData->email) || !validateEmail($formData->email))
+        else
         {
-            $flag = false;
-            setHTTPStatus("400","Email very short, minimum leght 1. Or this email not correct");
-            return;
-        }
-        if(!validateStringNoteLess($formData->password,6))
-        {
-            $flag = false;
-            setHTTPStatus("400","Password very short, minimum leght 6");
-            return;
-        }
-        if(!validateGender($formData->gender))
-        {
-            $flag = false;
-            setHTTPStatus("400","Gender is not correct");
-            return;
+            echo "norm";
+            //accountLogin($formData);
         }
         if($flag)
         {
-            $password = hash("sha1", $formData->password);
-            echo json_encode($formData);
-            $userIsertResalt = $Link->query("INSERT INTO account(fullname,email,password,birthDate,gender,phoneNumber) VALUES('$formData->fullname','$formData->email','$password','$formData->birthDate','$formData->gender','$formData->phoneNumber')")->fetch_assoc();
-            if(!$userIsertResalt)
-            {
-                setHTTPStatus("400");
-            }
-            else
-            {
-                //accountLogin($formData);
-            }
+            
         }
         
     }
