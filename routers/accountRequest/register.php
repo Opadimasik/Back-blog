@@ -40,8 +40,8 @@ function accountRegister($formData)
         }
         else
         {
-            echo "norm";
-            //accountLogin($formData);
+            include_once("login.php");
+            accountLogin($formData);
         }
         if($flag)
         {
