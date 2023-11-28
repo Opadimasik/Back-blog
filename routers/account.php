@@ -10,8 +10,12 @@ function route($method, $urlData, $formData)
             switch($urlData[1])
             {
                 case "register":
+                    include_once("accountRequest/register.php");
+                    accountRegister($formData);
                     break;
                 case "login":
+                    include_once("accountRequest/login.php");
+                    accountLogin($formData);
                     break;
                 case"logout":
                     break;
