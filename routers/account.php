@@ -18,6 +18,8 @@ function route($method, $urlData, $formData)
                     accountLogin($formData);
                     break;
                 case"logout":
+                    include_once("accountRequest/logout.php");
+                    accountLogout();
                     break;
             }
         case"PUT":
