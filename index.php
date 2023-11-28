@@ -1,5 +1,6 @@
 <?php
-
+include_once("helpers/headers.php");
+global $Link;
 header("Content-type: application/json");
 function getData($method)
 {
@@ -26,6 +27,12 @@ function getMethod() {
     return $_SERVER["REQUEST_METHOD"];
 }
 //connet to database, in my case connect to PHPmyAdmin
+$Link = mysqli_connect("localhostt","dbLab2","0000","dbLab2");
+if (!$Link) 
+{
+    setHTTPStatus('500','DB connetion error'.mysqli_connect_errno());
+    exit;
+}
 $url = isset($_GET['q']) ? $_GET['q'] :'';
 $url = rtrim($url,'/');
 $urlList = explode('/', $url);
@@ -40,7 +47,7 @@ if(file_exists(realpath(dirname(__FILE__)). '/routers/' . $routers .'.php'))
 }
 else
 {
-    //setHTTPStatus("404");
+    setHTTPStatus("404");
 }
 
 ?>
