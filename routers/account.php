@@ -7,27 +7,27 @@ function route($method, $urlData, $formData)
         case "GET":
             include_once("accountRequest/getProfile.php");
             accountGetProfile();
-            break;
+            return;
         case "POST":
             switch($urlData[1])
             {
                 case "register":
                     include_once("accountRequest/register.php");
                     accountRegister($formData);
-                    break;
+                    return;
                 case "login":
                     include_once("accountRequest/login.php");
                     accountLogin($formData);
-                    break;
+                    return;
                 case"logout":
                     include_once("accountRequest/logout.php");
                     accountLogout();
-                    break;
+                    return;
             }
         case"PUT":
             include_once("accountRequest/putProfile.php");
             accountPutProfile($formData);
-            break;
+            return;
 
     }
 }

@@ -4,15 +4,21 @@ function accountLogout()
 {
     global $Link;
     $token = getBearerToken();
-    $tokenUntilTime = $Link->query("SELECT `validUntil` FROM `token` WHERE value='$token'");
-
-    if ($tokenUntilTime->num_rows > 0) 
+    if (isTokenValid($token)) 
     {
-        spoilToken($token);
-    } 
-    else 
+        $tokenUntilTime = $Link->query("SELECT `validUntil` FROM `token` WHERE value='$token'");
+        if ($tokenUntilTime->num_rows > 0) 
+        {
+            spoilToken($token);
+        } 
+        else 
+        {
+            setHTTPStatus("401");
+        }
+    }
+    else
     {
-        setHTTPStatus("401");
+        setHTTPStatus("401", "The token has expired.");
     }
 }
 

@@ -1,7 +1,6 @@
 <?php
 function accountPutProfile($formData)
 {
-  
     global $Link;
     $token = getBearerToken();
     if (isTokenValid($token)) 
