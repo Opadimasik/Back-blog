@@ -1,7 +1,7 @@
 <?php
 function validateStringNoteLess($string, $lenght) 
 {
-    if (strlen($string) > $lenght) 
+    if ($string > $lenght) 
     {
         return true;
     }
@@ -29,4 +29,28 @@ function validateEmail($email) {
         return true; 
     }
 }
+function validatePassword($password) 
+{
+    // Проверка наличия хотя бы одной заглавной буквы
+    if (!preg_match('/[A-Z]/', $password)) {
+        return false;
+    }
+
+    // Проверка наличия хотя бы одной строчной буквы
+    if (!preg_match('/[a-z]/', $password)) {
+        return false;
+    }
+
+    // Проверка наличия хотя бы одной цифры
+    if (!preg_match('/[0-9]/', $password)) {
+        return false;
+    }
+
+    // Проверка наличия хотя бы одного специального символа
+    if (!preg_match('/[!@#$%^&*]/', $password)) {
+        return false;
+    }
+    return true;
+}
+
 ?>
