@@ -5,6 +5,8 @@ function route($method, $urlData, $formData)
     switch ($method) 
     {
         case "GET":
+            include_once("accountRequest/getProfile.php");
+            accountGetProfile();
             break;
         case "POST":
             switch($urlData[1])
