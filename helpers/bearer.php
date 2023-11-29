@@ -13,4 +13,37 @@ function getBearerToken() {
 
     return null; // Токен не найден
 }
+
+function isTokenValid($token) {
+    global $Link; 
+    $currentTime = date("Y-m-d H:i:s");
+    $result = $Link->query("SELECT `validUntil` FROM `token` WHERE value='$token'");
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $validUntil = $row['validUntil'];
+        if ($currentTime < $validUntil) 
+        {
+            // Токен действителен
+            return true;
+        }
+        else 
+        {
+            spoilToken($token);
+            return false;
+        }
+    } else 
+    {
+        // Токен не найден в базе данных
+        return false;
+    }
+}
+
+// функиция для порчи токена 
+function spoilToken($token) 
+{
+    global $Link;
+    $randomValue = random_int(0, 1000000);
+    $Link->query("UPDATE `token` SET `value`=$randomValue WHERE value='$token'");
+}
 ?>

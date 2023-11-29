@@ -23,6 +23,8 @@ function route($method, $urlData, $formData)
                     break;
             }
         case"PUT":
+            include_once("accountRequest/putProfile.php");
+            accountPutProfile($formData);
             break;
 
     }
