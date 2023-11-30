@@ -37,16 +37,17 @@ if (!$Link)
 }
 $formData = getData(getMethod());
 $method = getMethod();
-$url = isset($_GET['q']) ? $_GET['q'] :'';
-$url = rtrim($url,'/');
+$url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+$url = rtrim($url, '/');
 $urlList = explode('/', $url);
-$routers = $urlList[0];
-if(file_exists(realpath(dirname(__FILE__)). '/routers/' . $routers .'.php'))
+$routers = $urlList[1]; // Изменил с 0 на 1, так как 0-й элемент - пустая строка (начальный слеш)
+$urlList = array_slice($urlList, 2); // Пропускаю первые два элемента (пустая строка и имя маршрута)
+if (file_exists(realpath(dirname(__FILE__)) . '/routers/' . $routers . '.php')) 
 {
-    include_once 'routers/' . $routers .'.php';
+    include_once 'routers/' . $routers . '.php';
     route($method, $urlList, $formData);
-}
-else
+} 
+else 
 {
     setHTTPStatus("404");
 }
