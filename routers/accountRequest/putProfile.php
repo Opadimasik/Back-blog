@@ -10,14 +10,26 @@ function accountPutProfile($formData)
         {
             $row = $result->fetch_assoc();
             $accountID = $row['accountID'];
-
-            foreach ($formData as $key => $rowValue)
+            $allowedFields = ["email", "fullName", "birthDate", "gender", "phoneNumber"];
+            $query = "UPDATE `account` SET ";
+            foreach ($formData as $key => $rowValue) 
             {
-                $Link->query("UPDATE `account` SET `$key`='$rowValue' WHERE id='$accountID'");
-                if ($Link->error != "")
+                if(in_array($key,$allowedFields))
                 {
-                    setHTTPStatus("400", $Link->error);
+                    $query .= "`$key`='$rowValue', ";  
                 }
+                else
+                {
+                    setHTTPStatus("400", "Cannot change field '$key'");
+                }              
+            }
+            $query = rtrim($query, ', '); // Удаляем последнюю запятую
+            $query .= " WHERE id='$accountID'";
+
+            $Link->query($query);
+            if ($Link->error != "") 
+            {
+                setHTTPStatus("400", $Link->error);
             }
         } else 
         {
@@ -29,5 +41,3 @@ function accountPutProfile($formData)
         setHTTPStatus("401", "The token has expired.");
     }
 }
-
-?>
