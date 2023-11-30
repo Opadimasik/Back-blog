@@ -14,13 +14,16 @@ function accountPutProfile($formData)
             $query = "UPDATE `account` SET ";
             foreach ($formData as $key => $rowValue) 
             {
-                if(in_array($key,$allowedFields))
+                if(validateDataForPut($key,$rowValue))
                 {
-                    $query .= "`$key`='$rowValue', ";  
-                }
-                else
-                {
-                    setHTTPStatus("400", "Cannot change field '$key'");
+                    if(in_array($key,$allowedFields))
+                    {
+                        $query .= "`$key`='$rowValue', ";  
+                    }
+                    else
+                    {
+                        setHTTPStatus("400", "Cannot change field '$key'");
+                    }
                 }              
             }
             $query = rtrim($query, ', '); // Удаляем последнюю запятую
@@ -40,4 +43,31 @@ function accountPutProfile($formData)
     {
         setHTTPStatus("401", "The token has expired.");
     }
+}
+
+function validateDataForPut($key,$value)
+{
+    switch ($key) {
+        case "email":
+            if (!validateStringNoteLess(strlen($value),1) || !validateEmail($value)) 
+            {
+                setHTTPStatus("400","Email very short, minimum leght 1. Or this email not correct");
+                return false;
+            }
+            break;
+        case "fullName":
+            if (!validateStringNoteLess(strlen($value), 1)) 
+            {
+                setHTTPStatus("400","FullName very short, minimum leght 1");
+                return false;
+            }
+            break;
+        case "gender":
+            if (!validateGender($value)) {
+                setHTTPStatus("400", "Invalid gender value");
+                return false;
+            }
+            break;
+    }
+    return true;
 }
