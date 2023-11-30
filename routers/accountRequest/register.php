@@ -45,4 +45,3 @@ function accountRegister($formData)
         setHTTPStatus("400", "User already exists!");
     }
 }
-?>

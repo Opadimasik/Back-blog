@@ -29,4 +29,3 @@ function accountLogin($formData)
         setHTTPStatus("400");
     }
 }
-?>

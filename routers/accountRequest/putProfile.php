@@ -34,9 +34,10 @@ function accountPutProfile($formData)
             {
                 setHTTPStatus("400", $Link->error);
             }
-        } else 
+        } 
+        else 
         {
-            setHTTPStatus("401");
+            setHTTPStatus("401", "Unauthorized user");
         }
     }
     else

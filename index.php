@@ -50,5 +50,3 @@ else
 {
     setHTTPStatus("404");
 }
-
-?>
