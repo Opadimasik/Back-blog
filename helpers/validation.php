@@ -52,5 +52,18 @@ function validatePassword($password)
     }
     return true;
 }
+function isImage($url) 
+{
+    $headers = get_headers($url);
+    if (strpos($headers[0], '200') !== false) 
+    {
+        $image_info = getimagesize($url);
+        // Проверяю, что файл имеет тип "image"
+        if ($image_info && strpos($image_info['mime'], 'image') !== false) 
+        {
+            return true; // Это изображение
+        }
+    }
 
-?>
+    return false; // Не изображение
+}
