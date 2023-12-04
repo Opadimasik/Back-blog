@@ -1,4 +1,5 @@
 <?php
+include_once("helpers/postHelper.php");
 function route($method, $urlData, $formData) 
 { //Обрабатываем запрос.
     global $Link;
@@ -18,7 +19,8 @@ function route($method, $urlData, $formData)
             }
             
         case "POST":
-            if($urlData[1] =="like")
+            
+            if($urlData[1] == "like")
             {
                 include_once("postRequest/postLike.php");
                 likePost($formData);
