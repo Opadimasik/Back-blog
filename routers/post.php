@@ -1,4 +1,5 @@
 <?php
+include_once("helpers/postHelper.php");
 function route($method, $urlData, $formData) 
 { //Обрабатываем запрос.
     global $Link;
@@ -17,12 +18,12 @@ function route($method, $urlData, $formData)
             }
             
         case "POST":
-            // echo "svffs";
-            // include_once("postRequest/postLike.php");
-            // likePost($formData);
-            if($urlData[0] =="")
+            
+            if($urlData[1] == "like")
             {
-                
+                include_once("postRequest/postLike.php");
+                likePost($formData);
+                return;
             }
             else
             {
@@ -30,7 +31,8 @@ function route($method, $urlData, $formData)
                 // return;
             }
         case "DELETE":
-            // include_once("postRequest/");
-            // return;
+            include_once("postRequest/deleteLike.php");
+            likeDelete();
+            return;
     }
 }
