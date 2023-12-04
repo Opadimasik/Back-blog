@@ -35,13 +35,21 @@ if (!$Link)
     setHTTPStatus('500','DB connetion error'.mysqli_connect_errno());
     exit;
 }
+
+//url for url
+// $urlAll = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+// $urlAll = rtrim($urlAll, '/');
+// $urlListAll = explode('/', $urlAll);
+// $routersAll = $urlListAll[1]; // Изменил с 0 на 1, так как 0-й элемент - пустая строка (начальный слеш)
+// $urlListAll = array_slice($urlListAll, 2); // Пропускаю первые два элемента (пустая строка и имя маршрута)
+//url for routers
 $formData = getData(getMethod());
 $method = getMethod();
-$url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
-$url = rtrim($url, '/');
+$url = isset($_GET['q']) ? $_GET['q'] :'';
+$url = rtrim($url,'/');
 $urlList = explode('/', $url);
-$routers = $urlList[1]; // Изменил с 0 на 1, так как 0-й элемент - пустая строка (начальный слеш)
-$urlList = array_slice($urlList, 2); // Пропускаю первые два элемента (пустая строка и имя маршрута)
+$routers = $urlList[0];
+
 if (file_exists(realpath(dirname(__FILE__)) . '/routers/' . $routers . '.php')) 
 {
     include_once 'routers/' . $routers . '.php';
@@ -51,5 +59,3 @@ else
 {
     setHTTPStatus("404");
 }
-
-?>

@@ -7,28 +7,30 @@ function route($method, $urlData, $formData)
         case "GET":
             if(!is_null($urlData[0]))
             {
-                include_once("postRequest/");
-                return;
+                // include_once("postRequest/");
+                // return;
             }
             else
             {
-                include_once("postRequest/");
-                return;
+                // include_once("postRequest/");
+                // return;
             }
             
         case "POST":
-            if(!is_null($urlData[0]))
+            // echo "svffs";
+            // include_once("postRequest/postLike.php");
+            // likePost($formData);
+            if($urlData[0] =="")
             {
-                include_once("postRequest/");
-                return;
+                
             }
             else
             {
-                include_once("postRequest/");
-                return;
+                // include_once("postRequest/");
+                // return;
             }
         case "DELETE":
-            include_once("postRequest/");
-            return;
+            // include_once("postRequest/");
+            // return;
     }
 }
