@@ -11,27 +11,31 @@ function createPost($formData)
             $authorIdData = $authorIdResult->fetch_assoc();
             if(!is_null($authorIdData))
             {
-                $authorId = $authorIdData['accountID'];
-                $authorResult = $Link->query("SELECT `fullName` FROM `account` where id='$authorId'");
-                $authorData = $authorResult->fetch_assoc();
-                $guid = bin2hex(random_bytes(16));
-                $title = $formData->title;
-                $description = $formData->description;
-                $image = $formData->image;
-                $author = $authorData['fullName'];
-                $addressId = $formData->addressId;
-                $readingTime = $formData->readingTime;
-                $query = "INSERT INTO `post` (`id`, `title`, `description`, `image`, `authorId`, `author`, `addressId`, `readingTime`)
-                        VALUES ('$guid', '$title', '$description', '$image', '$authorId', '$author', '$addressId', '$readingTime')";
-                $postInsertResult = $Link->query($query);
-                if(!$postInsertResult)
+                if(checkExistTags($formData->tags))
                 {
-                    setHTTPStatus("400","$Link->error");
+                    $authorId = $authorIdData['accountID'];
+                    $authorResult = $Link->query("SELECT `fullName` FROM `account` where id='$authorId'");
+                    $authorData = $authorResult->fetch_assoc();
+                    $guid = bin2hex(random_bytes(16));
+                    $title = $formData->title;
+                    $description = $formData->description;
+                    $image = $formData->image;
+                    $author = $authorData['fullName'];
+                    $addressId = $formData->addressId;
+                    $readingTime = $formData->readingTime;
+                    $query = "INSERT INTO `post` (`id`, `title`, `description`, `image`, `authorId`, `author`, `addressId`, `readingTime`)
+                            VALUES ('$guid', '$title', '$description', '$image', '$authorId', '$author', '$addressId', '$readingTime')";
+                    $postInsertResult = $Link->query($query);
+                    if(!$postInsertResult)
+                    {
+                        setHTTPStatus("400","$Link->error");
+                    }
+                    else
+                    {
+                        echo"ok";
+                    }
                 }
-                else
-                {
-                    echo"ok";
-                }
+                else return;
             }
             else
             {
@@ -40,6 +44,7 @@ function createPost($formData)
             }
             
         }
+        else return;
         
     }
     else
@@ -65,4 +70,25 @@ function validateDataPost($formData)
             return false;
         }
         return true;
+}
+
+function checkExistTags($tags)
+{
+    global $Link;
+    $tagsString = implode("', '", $tags);
+    $result = $Link->query("SELECT id FROM tag WHERE id IN ('$tagsString')");
+    if (!$result) 
+    {
+        setHTTPStatus('500', $Link->error);
+        return false;
+    }
+    $existingTags = $result->fetch_all(MYSQLI_ASSOC);
+    $missingTags = array_diff($tags, $existingTags);
+    if (!empty($missingTags)) 
+    {
+        $missingTagsString = implode(', ', $missingTags);
+        setHTTPStatus('404', "Tag(s) not exist: $missingTagsString");
+        return false;
+    }
+    return true;
 }
