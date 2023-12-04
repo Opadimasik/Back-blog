@@ -32,7 +32,7 @@ function createPost($formData)
                     }
                     else
                     {
-                        echo"ok";
+                        if(addTagsToPost($guid,$formData->tags)) echo json_encode($guid);
                     }
                 }
                 else return;
@@ -50,6 +50,32 @@ function createPost($formData)
     else
     {
         setHTTPStatus("401", "The token has expired.");
+    }
+}
+function addTagsToPost($postId,$tags)
+{
+    global $Link;
+    // Подготовленный запрос для вставки значений
+    $query = "INSERT INTO `tag_post` (`postId`, `tagId`) VALUES (?, ?)";
+    $stmt = $Link->prepare($query);
+    if ($stmt) 
+    {
+        // Привязываем параметры к запросу
+        $stmt->bind_param("ss", $postId, $tagId);
+        // Итерируемся по массиву тегов и вставляем каждый тег для заданного postId
+        foreach ($tags as $tagId) 
+        {
+            $stmt->execute();
+            
+        }
+        $stmt->close();
+        return true;
+    } 
+    else 
+    {
+        // Обработка ошибки подготовки запроса
+        setHTTPStatus('500', $Link->error);
+        return false;
     }
 }
 function validateDataPost($formData)
@@ -82,7 +108,11 @@ function checkExistTags($tags)
         setHTTPStatus('500', $Link->error);
         return false;
     }
-    $existingTags = $result->fetch_all(MYSQLI_ASSOC);
+    $existingTags = [];
+    while ($row = $result->fetch_assoc()) 
+    {
+        $existingTags[] = $row['id'];
+    }
     $missingTags = array_diff($tags, $existingTags);
     if (!empty($missingTags)) 
     {
