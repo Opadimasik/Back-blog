@@ -2,6 +2,7 @@
 include_once("helpers/headers.php");
 include_once("helpers/validation.php");
 include_once("helpers/bearer.php");
+include_once("helpers/getParams.php");
 global $Link;
 header("Content-type: application/json");
 function getData($method)
@@ -35,13 +36,13 @@ if (!$Link)
     setHTTPStatus('500','DB connetion error'.mysqli_connect_errno());
     exit;
 }
+
 $formData = getData(getMethod());
 $method = getMethod();
-$url = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
-$url = rtrim($url, '/');
+$url = isset($_GET['q']) ? $_GET['q'] :'';
+$url = rtrim($url,'/');
 $urlList = explode('/', $url);
-$routers = $urlList[1]; // Изменил с 0 на 1, так как 0-й элемент - пустая строка (начальный слеш)
-$urlList = array_slice($urlList, 2); // Пропускаю первые два элемента (пустая строка и имя маршрута)
+$routers = $urlList[0];
 if (file_exists(realpath(dirname(__FILE__)) . '/routers/' . $routers . '.php')) 
 {
     include_once 'routers/' . $routers . '.php';
@@ -51,5 +52,3 @@ else
 {
     setHTTPStatus("404");
 }
-
-?>

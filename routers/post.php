@@ -2,24 +2,26 @@
 function route($method, $urlData, $formData) 
 { //Обрабатываем запрос.
     global $Link;
+    include_once("helpers/postHelper.php");
     switch ($method) 
     {
         case "GET":
             if(!is_null($urlData[0]))
             {
-                //include_once("postRequest/");
-                return;
+                // include_once("postRequest/");
+                // return;
             }
             else
             {
-                //include_once("postRequest/");
-                return;
+                // include_once("postRequest/");
+                // return;
             }
             
         case "POST":
-            if(!is_null($urlData[0]))
+            if($urlData[1] =="like")
             {
-                //include_once("postRequest/");
+                include_once("postRequest/postLike.php");
+                likePost($formData);
                 return;
             }
             else
@@ -29,7 +31,8 @@ function route($method, $urlData, $formData)
                 return;
             }
         case "DELETE":
-            //include_once("postRequest/");
+            include_once("postRequest/deleteLike.php");
+            likeDelete();
             return;
     }
 }
