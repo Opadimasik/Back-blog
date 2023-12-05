@@ -14,6 +14,7 @@ function createPost($formData)
                 if(checkExistTags($formData->tags))
                 {
                     $authorId = $authorIdData['accountID'];
+                    if(!checkExistAuthor($authorId)) return;
                     $authorResult = $Link->query("SELECT `fullName` FROM `account` where id='$authorId'");
                     $authorData = $authorResult->fetch_assoc();
                     $guid = bin2hex(random_bytes(16));
@@ -26,7 +27,8 @@ function createPost($formData)
                     $query = "INSERT INTO `post` (`id`, `title`, `description`, `image`, `authorId`, `author`, `addressId`, `readingTime`)
                             VALUES ('$guid', '$title', '$description', '$image', '$authorId', '$author', '$addressId', '$readingTime')";
                     $postInsertResult = $Link->query($query);
-                    if(!$postInsertResult)
+                    $updatePostCountAuthor = $Link->query("UPDATE author SET `posts`=`posts`+1 where`accountId`='$authorId'");
+                    if(!$postInsertResult || !$updatePostCountAuthor)
                     {
                         setHTTPStatus("400","$Link->error");
                     }
@@ -121,4 +123,47 @@ function checkExistTags($tags)
         return false;
     }
     return true;
+}
+
+function checkExistAuthor($authorId)
+{
+    global $Link;
+    $query = $Link->query("SELECT `id` from author where `accountId`='$authorId'")->fetch_assoc();
+    if(!is_null($query))
+    {
+        return true;
+    }
+    else
+    {
+        $authorData= $Link->query("SELECT `fullName`, `gender`, `birthDate` FROM `account` WHERE id='$authorId';
+        ")->fetch_assoc();
+        if (!is_null($authorData))
+        {
+            $fullName = $authorData["fullName"];
+            $gender= $authorData["gender"];
+            $birthDate= $authorData["birthDate"];
+            $insertAuthorQuery = $Link->query("
+            INSERT INTO author(`fullName`, `gender`, `accountID`, `birthDate`) 
+            VALUES (
+                '$fullName',
+                '$gender',
+                '$authorId',
+                '$birthDate'
+            )
+            ");
+            if(!$insertAuthorQuery)
+            {
+                setHTTPStatus('500', $Link->error);
+                return false;
+            }
+            return true;
+        }
+        else
+        {
+            setHTTPStatus('500', $Link->error);
+            return false;
+        }
+        
+    }
+
 }
