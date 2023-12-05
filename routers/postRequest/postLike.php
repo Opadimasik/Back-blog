@@ -32,10 +32,11 @@ function likePost($formData)
                 if ($insertQuery)
                 {
                     // Обновляю значения в таблице post
-                    $updatePostQuery = $Link->query("UPDATE post SET likes = likes + 1, hasLike = 1 WHERE id = '$postId'");
-                    if (!$updatePostQuery) 
+                    $updatePostQuery = $Link->query("UPDATE post SET likes = likes + 1 WHERE id = '$postId'");
+                    $updateAuthorQuery = $Link->query("UPDATE author SET likes = likes + 1 WHERE accountId = '$authorIdData'");
+                    if (!$updatePostQuery || !$updateAuthorQuery) 
                     {
-                        // Обработка ошибки при обновлении значений в таблице post
+                        // Обработка ошибки при обновлении значений в таблице post или author
                         setHTTPStatus('400', "Ошибка при обновлении значений в таблице post: " . $Link->error);
                     }
                 } 
