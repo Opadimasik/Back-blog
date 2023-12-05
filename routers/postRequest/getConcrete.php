@@ -22,7 +22,7 @@ function getDataConcretePost($formData)
                 return;
             }
             $dataPostResult = $Link->query("SELECT * FROM post where `id`='$postId'");
-            $dataPost = $dataPostResult->fetch_all(MYSQLI_ASSOC);
+            $dataPost = $dataPostResult->fetch_array(MYSQLI_ASSOC);
             if(!is_null($dataPost))
             {
                 $tagPostResult = $Link->query("SELECT * FROM `tag` where `id` in
@@ -33,8 +33,20 @@ function getDataConcretePost($formData)
                 if(!is_null($hasLikeResult)) $hasLike=true;
                 
                 echo json_encode([
+                    "id"=>$dataPost["id"],
+                    "createTime"=> $dataPost['createTime'],
+                    "title"=> $dataPost["title"],
+                    "description"=> $dataPost["description"],
+                    "image"=> $dataPost["image"],
+                    "authorId"=> $dataPost["authorId"],
+                    "author"=> $dataPost["author"],
+                    "communityId"=> $dataPost["communityId"],
+                    "communityName"=> $dataPost["communityName"],
+                    "addressId"=> $dataPost["addressId"],
+                    "likes"=> $dataPost["likes"],
+                    "commentsCount"=> $dataPost["commentsCount"],
+                    "readingTime"=> $dataPost["readingTime"],
                     "tags"=>$tagsPost,
-                    $dataPost,
                     'hasLike'=>$hasLike
                 ]);
             }
