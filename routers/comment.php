@@ -4,6 +4,7 @@ function route($method, $urlData, $formData)
 { //Обрабатываем запрос.
     global $Link;
     include_once("helpers/postHelper.php");
+    include_once("helpers/commentHelper.php");
     switch ($method) 
     {
         case "GET":
@@ -11,9 +12,9 @@ function route($method, $urlData, $formData)
 
             // return;
         case "DELETE":
-            // include_once("commentRequest/");
-
-            // return;
+            include_once("commentRequest/commentDelete.php");
+            deleteComment($formData);
+            return;
         case "PUT":
             // include_once("commentRequest/");
 

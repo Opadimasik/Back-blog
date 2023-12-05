@@ -49,20 +49,6 @@ function createComment($formData)
                         return;
                     }
                 }
-                
-            //     $test = $Link->query("WITH RECURSIVE CommentTree AS (
-            //         SELECT id, parentId, content
-            //         FROM comment
-            //         WHERE id = '595f1c432cd575ae673e58b1992d27fb'
-            //         UNION
-            //         SELECT c.id, c.parentId, c.content
-            //         FROM comment c
-            //         JOIN CommentTree ct ON c.parentId = ct.id
-            //     )
-            //     SELECT * FROM CommentTree
-            //     WHERE id <> '595f1c432cd575ae673e58b1992d27fb';");
-            //     $testRes = $test->fetch_all(MYSQLI_ASSOC);
-            //     echo json_encode($testRes);
             }
             else return;
         }
