@@ -27,10 +27,16 @@ function route($method, $urlData, $formData)
                 likePost($formData);
                 return;
             }
+            elseif($urlData[1] == "comment")
+            {
+                include_once("commentRequest/commentPost.php");
+                createComment($formData);
+                return;
+            }
             else
             {
                 include_once("postRequest/creating.php");
-                createPost($formData);
+                createComment($formData);
                 return;
             }
         case "DELETE":
