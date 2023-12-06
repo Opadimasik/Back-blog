@@ -10,6 +10,7 @@ function likeDelete()
         $authorIdData = $authorIdResult->fetch_assoc();
         if(!is_null($authorIdData))
         {
+            $authorId = $authorIdData["accountID"];
             $postId = getParams("postId");
             if(is_null($postId))
             {
@@ -21,7 +22,6 @@ function likeDelete()
                 setHTTPStatus('404', "Post not find. Check your postId");
                 return;
             }
-            $authorId = $authorIdData["accountID"];
             $checkQueryResult = $Link->query("SELECT `id` FROM `like_account` WHERE `postId`='$postId' AND `accountId`='$authorId'");
             $checkQuery = $checkQueryResult->fetch_assoc();
             if(!is_null($checkQuery))

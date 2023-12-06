@@ -7,10 +7,11 @@ function route($method, $urlData, $formData)
     switch ($method) 
     {
         case "GET":
-            if(!is_null($urlData[0]))
+            if(!is_null(getParams("id")))
             {
-                // include_once("postRequest/");
-                // return;
+                include_once("postRequest/getConcrete.php");
+                getDataConcretePost($formData);
+                return;
             }
             else
             {
