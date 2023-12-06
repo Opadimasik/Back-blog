@@ -15,8 +15,9 @@ function route($method, $urlData, $formData)
             }
             else
             {
-                // include_once("postRequest/");
-                // return;
+                include_once("postRequest/postsGet.php");
+                getDataConcretePost($formData);
+                return;
             }
             
         case "POST":
