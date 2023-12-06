@@ -5,13 +5,62 @@ function getDataConcretePost($formData)
     $token = getBearerToken();
     if (isTokenValid($token)) 
     {
-        $page = getParams("page");
-        getPosts(["e587312f-4df7-4879-e6e8-08dbea521a91"],"D",null,null,"CrefdateDesc",null,$page,5);
+        $page = trim(getParams("page"));
+        $size = trim(getParams("size"));
+        $min = trim(getParams("min"));
+        $max = trim(getParams("max"));
+        $sorting = trim(getParams("sorting"));
+        $author = trim(getParams("author"));
+        $onlyMyCommunities = trim(getParams("onlyMyCommunities"));
+        $tags = getParamsForRepetition("tags");
+        if(!validateParams($tags,$author,$min,$max,$sorting,$onlyMyCommunities,$page,$size))
+        {
+            return;
+        }
+        getPosts($tags,$author,$min,$max,$sorting,$onlyMyCommunities,$page,$size);
     }
     else
     {
         setHTTPStatus("401", "The token has expired.");
     }
+}
+function validateParams($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $page, $size)
+{
+    if (!checkExistTags($tags)) {
+        return false;
+    }
+
+    if (!empty($min) && ($min < 0 || !preg_match('/[0-9]+/', $min))) {
+        setHTTPStatus("400", "Min must be an integer greater than or equal to 0");
+        return false;
+    }
+
+    if (!empty($max) && ($max < 0 || !preg_match('/[0-9]+/', $max))) {
+        setHTTPStatus("400", "Max must be an integer greater than or equal to 0");
+        return false;
+    }
+
+    if (!empty($sorting) && !in_array($sorting, ["CreateDesc", "CreateAsc", "LikeAsc", "LikeDesc"])) {
+        setHTTPStatus("400", "Invalid value for sorting parameter");
+        return false;
+    }
+
+    if (!empty($onlyMyCommunities) && !in_array($onlyMyCommunities,["true","false"])) {
+        setHTTPStatus("400", "OnlyMyCommunities must be a boolean");
+        return false;
+    }
+
+    if ($page < 0 || !preg_match('/[0-9]+/', $page)) {
+        setHTTPStatus("400", "Page must be an integer greater than 0");
+        return false;
+    }
+
+    if ($size < 0 || !preg_match('/[0-9]+/', $size)) {
+        setHTTPStatus("400", "Size must be an integer greater than 0");
+        return false;
+    }
+
+    return true;
 }
 function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $page, $size) {
     global $Link;
