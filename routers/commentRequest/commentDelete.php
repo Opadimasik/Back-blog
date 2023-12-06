@@ -11,9 +11,10 @@ function deleteComment($formData)
             setHTTPStatus("404","There is no such comment that was passed to id. Try checking the data.");
             return;
         }
-        $authorAccessQuery = $Link->query("SELECT `authorId` FROM `comment`where
-        (SELECT `accountID` FROM `token`WHERE value='$token')");
-        if ($authorAccessQuery)
+        $authorAccessQuery = $Link->query("SELECT `authorId` FROM `comment`where `authorId`=
+        (SELECT `accountID` FROM `token`WHERE value='$token') and id = '$commentId';");
+        $authorAccess = $authorAccessQuery->fetch_assoc();
+        if (!is_null($authorAccess))
         {
             $deleteCommentQuery = $Link->query("UPDATE comment
             SET 
