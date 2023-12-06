@@ -16,8 +16,8 @@ function route($method, $urlData, $formData)
             deleteComment($formData);
             return;
         case "PUT":
-            // include_once("commentRequest/");
-
-            // return;
+            include_once("commentRequest/commentPut.php");
+            modifieComment($formData);
+            return;
     }
 }
