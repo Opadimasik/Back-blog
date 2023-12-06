@@ -31,7 +31,19 @@ function getDataConcretePost($formData)
                 $hasLike=false;
                 $hasLikeResult = $Link->query("SELECT `id` FROM `like_account` WHERE `postId`='$postId' AND `accountId`='$accountId'")->fetch_assoc();
                 if(!is_null($hasLikeResult)) $hasLike=true;
-                
+                $commentsQuery = $Link->query("SELECT 
+                    id, 
+                    createTime, 
+                    content, 
+                    modifiedDate, 
+                    deleteDate, 
+                    authorId, 
+                    author, 
+                    subComments
+                FROM comment
+                WHERE `postId`='$postId' and `parentId`=''");
+                $commentsResult = $commentsQuery ->fetch_all(MYSQLI_ASSOC);
+                echo "$Link->error";
                 echo json_encode([
                     "id"=>$dataPost["id"],
                     "createTime"=> $dataPost['createTime'],
@@ -47,6 +59,7 @@ function getDataConcretePost($formData)
                     "commentsCount"=> $dataPost["commentsCount"],
                     "readingTime"=> $dataPost["readingTime"],
                     "tags"=>$tagsPost,
+                    "comments"=>$commentsResult,
                     'hasLike'=>$hasLike
                 ]);
             }
