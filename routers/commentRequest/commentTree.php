@@ -21,7 +21,7 @@ function getCommentTree()
                 author, 
                 subComments
             FROM comment
-            WHERE id = '$commentId' AND isDelete = false
+            WHERE id = '$commentId'
             UNION
             SELECT 
                 c.id, 
@@ -34,7 +34,6 @@ function getCommentTree()
                 c.subComments
             FROM comment c
             JOIN CommentTree ct ON c.parentId = ct.id
-            WHERE c.isDelete = false
         )
         SELECT 
             id, 
@@ -48,6 +47,8 @@ function getCommentTree()
         FROM CommentTree
         WHERE id <> '$commentId';
     ");
+    //
+    //WHERE c.isDelete = false
     if($commetTreeQuery)
     {
         $commetTreeResult = $commetTreeQuery->fetch_all(MYSQLI_ASSOC);
