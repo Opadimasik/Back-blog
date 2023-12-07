@@ -1,5 +1,5 @@
 <?php
-function getDataConcretePost($formData)
+function getDataConcretePost($formData,$postId)
 {
     global $Link;
     $token = getBearerToken();
@@ -10,17 +10,6 @@ function getDataConcretePost($formData)
         if(!is_null($accountIdData))
         {
             $accountId = $accountIdData["accountID"];
-            $postId = getParams("id");
-            if(is_null($postId))
-            {
-                setHTTPStatus('400','The '.'Id'.' parameter was passed incorrectly');
-                return;
-            }
-            if(!checkExistPost($postId))
-            {
-                setHTTPStatus('404', "Post not find. Check your postId");
-                return;
-            }
             $dataPostResult = $Link->query("SELECT * FROM post where `id`='$postId'");
             $dataPost = $dataPostResult->fetch_array(MYSQLI_ASSOC);
             if(!is_null($dataPost))

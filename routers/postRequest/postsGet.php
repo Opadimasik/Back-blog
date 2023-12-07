@@ -26,41 +26,62 @@ function getDataConcretePost($formData)
 }
 function validateParams($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $page, $size)
 {
-    if (!checkExistTags($tags)) {
-        return false;
+    $isValidate = true;
+    $mesage = array();
+    $isExistTags=checkExistTags($tags);
+    if (!is_null($isExistTags)) {
+        $mesage[] = $isExistTags[1];
+        $isValidate = false;
+        //return false;
     }
 
-    if (!empty($min) && ($min < 0 || !preg_match('/[0-9]+/', $min))) {
-        setHTTPStatus("400", "Min must be an integer greater than or equal to 0");
-        return false;
+    if (!empty($min) && ($min < 0 || !preg_match('/[0-9]+$/', $min))) {
+        $isValidate = false;
+        $mesage[] = "Min must be an integer greater than or equal to 0";
+        // setHTTPStatus("400", "Min must be an integer greater than or equal to 0");
+        // return false;
     }
 
-    if (!empty($max) && ($max < 0 || !preg_match('/[0-9]+/', $max))) {
-        setHTTPStatus("400", "Max must be an integer greater than or equal to 0");
-        return false;
+    if (!empty($max) && ($max < 0 || !preg_match('/[0-9]+$/', $max))) {
+        $isValidate = false;
+        $mesage[] = "Max must be an integer greater than or equal to 0";
+        // setHTTPStatus("400", "Max must be an integer greater than or equal to 0");
+        // return false;
     }
 
     if (!empty($sorting) && !in_array($sorting, ["CreateDesc", "CreateAsc", "LikeAsc", "LikeDesc"])) {
-        setHTTPStatus("400", "Invalid value for sorting parameter");
-        return false;
+        $isValidate = false;
+        $mesage[] = "Invalid value for sorting parameter";
+        // setHTTPStatus("400", "Invalid value for sorting parameter");
+        // return false;
     }
 
     if (!empty($onlyMyCommunities) && !in_array($onlyMyCommunities,["true","false"])) {
-        setHTTPStatus("400", "OnlyMyCommunities must be a boolean");
-        return false;
+        $isValidate = false;
+        $mesage[] = "OnlyMyCommunities must be a boolean";
+        // setHTTPStatus("400", "OnlyMyCommunities must be a boolean");
+        // return false;
     }
 
-    if ($page < 0 || !preg_match('/[0-9]+/', $page)) {
-        setHTTPStatus("400", "Page must be an integer greater than 0");
-        return false;
+    if ($page < 0 || !preg_match('/[0-9]+$/', $page)) {
+        $isValidate = false;
+        $mesage[] = "Page must be an integer greater than 0";
+        // setHTTPStatus("400", "Page must be an integer greater than 0");
+        // return false;
     }
 
-    if ($size < 0 || !preg_match('/[0-9]+/', $size)) {
-        setHTTPStatus("400", "Size must be an integer greater than 0");
+    if ($size < 0 || !preg_match('/[0-9]+$/', $size)) {
+        $isValidate = false;
+        $mesage[] = "Size must be an integer greater than 0";
+        // setHTTPStatus("400", "Size must be an integer greater than 0");
+        // return false;
+    }
+    if($isValidate == true) return true;
+    else 
+    {
+        setHTTPStatus(!is_null($isExistTags)?"404":"400",$mesage);
         return false;
     }
-
-    return true;
 }
 function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $page, $size) {
     global $Link;
@@ -132,7 +153,10 @@ function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $pag
 
                 $tagPostResult = $Link->query("SELECT * FROM `tag` WHERE `id` IN (SELECT `tagId` FROM tag_post WHERE `postId`='$postId')");
                 $tagsPost = $tagPostResult->fetch_all(MYSQLI_ASSOC);
-
+                $hasLike=false;
+                $accountId = $post['authorId'];
+                $hasLikeResult = $Link->query("SELECT `id` FROM `like_account` WHERE `postId`='$postId' AND `accountId`='$accountId'")->fetch_assoc();
+                if(!is_null($hasLikeResult)) $hasLike=true;
                 $commentsQuery = $Link->query("SELECT 
                     id, 
                     createTime, 
@@ -148,6 +172,7 @@ function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $pag
 
                 $post['tags'] = $tagsPost;
                 $post['comments'] = $commentsResult;
+                $post['hasLike'] = $hasLike;
             }
 
             $pagination = [

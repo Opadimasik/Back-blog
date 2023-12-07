@@ -7,7 +7,11 @@ function checkExistPost($postId)
     {
         return true;
     }
-    else return false;
+    else
+    {
+        //setHTTPStatus("404","This post was not found or does not exist");
+        return false;
+    } 
 }
 function checkExistTags($tags)
 {
@@ -16,8 +20,8 @@ function checkExistTags($tags)
     $result = $Link->query("SELECT id FROM tag WHERE id IN ('$tagsString')");
     if (!$result) 
     {
-        setHTTPStatus('500', $Link->error);
-        return false;
+        //setHTTPStatus('500', $Link->error);
+        return ["500","$Link->error"];
     }
     $existingTags = [];
     while ($row = $result->fetch_assoc()) 
@@ -28,8 +32,8 @@ function checkExistTags($tags)
     if (!empty($missingTags)) 
     {
         $missingTagsString = implode(', ', $missingTags);
-        setHTTPStatus('404', "Tag(s) not exist: $missingTagsString");
-        return false;
+        //setHTTPStatus('404', "Tag(s) not exist: $missingTagsString");
+        return ['404',"Tag(s) not exist: $missingTagsString"];
     }
-    return true;
+    return null;
 }

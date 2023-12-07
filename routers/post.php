@@ -7,10 +7,10 @@ function route($method, $urlData, $formData)
     switch ($method) 
     {
         case "GET":
-            if(!is_null(getParams("id")))
+            if(checkExistPost($urlData[1]))
             {
                 include_once("postRequest/getConcrete.php");
-                getDataConcretePost($formData);
+                getDataConcretePost($formData, $urlData[1]);
                 return;
             }
             else
@@ -22,10 +22,10 @@ function route($method, $urlData, $formData)
             
         case "POST":
             
-            if($urlData[1] == "like")
+            if($urlData[2] == "like" && checkExistPost($urlData[1]))
             {
                 include_once("postRequest/postLike.php");
-                likePost($formData);
+                likePost($formData, $urlData[1]);
                 return;
             }
             else
@@ -35,8 +35,13 @@ function route($method, $urlData, $formData)
                 return;
             }
         case "DELETE":
-            include_once("postRequest/deleteLike.php");
-            likeDelete();
-            return;
+            if($urlData[2] == "like" && checkExistPost($urlData[1]))
+            {
+                include_once("postRequest/deleteLike.php");
+                likeDelete($urlData[1]);
+                return;
+            }
+        default:
+            setHTTPStatus("404","This post was not found or does not exist or you sent a non-core request");
     }
 }
