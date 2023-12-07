@@ -26,6 +26,6 @@ function accountLogin($formData)
     }
     else
     {
-        setHTTPStatus("400");
+        setHTTPStatus("400","User not exist");
     }
 }

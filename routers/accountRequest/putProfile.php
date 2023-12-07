@@ -1,6 +1,7 @@
 <?php
 function accountPutProfile($formData)
 {
+    $mesage = array();
     global $Link;
     $token = getBearerToken();
     if (isTokenValid($token)) 
@@ -14,7 +15,7 @@ function accountPutProfile($formData)
             $query = "UPDATE `account` SET ";
             foreach ($formData as $key => $rowValue) 
             {
-                if(validateDataForPut($key,$rowValue))
+                if(validateDataForPut($key,$rowValue,$mesage))
                 {
                     if(in_array($key,$allowedFields))
                     {
@@ -22,7 +23,7 @@ function accountPutProfile($formData)
                     }
                     else
                     {
-                        setHTTPStatus("400", "Cannot change field '$key'");
+                        $mesage[] = "Cannot change field '$key'";
                     }
                 }              
             }
@@ -32,7 +33,11 @@ function accountPutProfile($formData)
             $Link->query($query);
             if ($Link->error != "") 
             {
-                setHTTPStatus("400", $Link->error);
+                $mesage[] = $Link->error;
+            }
+            if(!empty($mesage))
+            {
+                setHTTPStatus("400",$mesage);
             }
         } 
         else 
@@ -46,26 +51,26 @@ function accountPutProfile($formData)
     }
 }
 
-function validateDataForPut($key,$value)
+function validateDataForPut($key,$value,&$mesage)
 {
     switch ($key) {
         case "email":
             if (!validateStringNoteLess(strlen($value),1) || !validateEmail($value)) 
             {
-                setHTTPStatus("400","Email very short, minimum leght 1. Or this email not correct");
+                $mesage[] = "Email very short, minimum leght 1. Or this email not correct";
                 return false;
             }
             break;
         case "fullName":
             if (!validateStringNoteLess(strlen($value), 1)) 
             {
-                setHTTPStatus("400","FullName very short, minimum leght 1");
+                $mesage[] = "FullName very short, minimum leght 1";
                 return false;
             }
             break;
         case "gender":
             if (!validateGender($value)) {
-                setHTTPStatus("400", "Invalid gender value");
+                $mesage[] =  "Invalid gender value";
                 return false;
             }
             break;
