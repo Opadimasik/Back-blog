@@ -80,45 +80,34 @@ function addTagsToPost($postId,$tags)
 }
 function validateDataPost($formData)
 {
+    $isValidate = true;
+    $mesage = array();
     if(!validateStringNoteLess(strlen($formData->title),5))
         {
-            setHTTPStatus("400","Title very short, minimum leght 5 or it's not there.");
-            return false;
+            $isValidate = false;
+            $mesage[] = "Title very short, minimum leght 5 or it's not there.";
+            // setHTTPStatus("400","Title very short, minimum leght 5 or it's not there.");
+            // return false;
         }
         if(!validateStringNoteLess(strlen($formData->description),5))
         {
-            setHTTPStatus("400","Description very short, minimum leght 5");
-            return false;
+            $isValidate = false;
+            $mesage[] = "Description very short, minimum leght 5";
+            // setHTTPStatus("400","Description very short, minimum leght 5");
+            // return false;
         }
         if (!isImage($formData->image)) 
         {
-            setHTTPStatus("400","This is not an image or the image is not available.");
+            $mesage[] = "This is not an image or the image is not available.";
+            $isValidate = false;
+            // setHTTPStatus("400","This is not an image or the image is not available.");
+            // return false;
+        }
+        if($isValidate == true) return true;
+        else 
+        {
+            setHTTPStatus("400",$mesage);
             return false;
         }
-        return true;
-}
-
-function checkExistTags($tags)
-{
-    global $Link;
-    $tagsString = implode("', '", $tags);
-    $result = $Link->query("SELECT id FROM tag WHERE id IN ('$tagsString')");
-    if (!$result) 
-    {
-        setHTTPStatus('500', $Link->error);
-        return false;
-    }
-    $existingTags = [];
-    while ($row = $result->fetch_assoc()) 
-    {
-        $existingTags[] = $row['id'];
-    }
-    $missingTags = array_diff($tags, $existingTags);
-    if (!empty($missingTags)) 
-    {
-        $missingTagsString = implode(', ', $missingTags);
-        setHTTPStatus('404', "Tag(s) not exist: $missingTagsString");
-        return false;
-    }
-    return true;
+        
 }

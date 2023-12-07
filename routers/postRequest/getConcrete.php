@@ -1,5 +1,5 @@
 <?php
-function getDataConcretePost($formData)
+function getDataConcretePost($formData,$postId)
 {
     global $Link;
     $token = getBearerToken();
@@ -10,17 +10,6 @@ function getDataConcretePost($formData)
         if(!is_null($accountIdData))
         {
             $accountId = $accountIdData["accountID"];
-            $postId = getParams("id");
-            if(is_null($postId))
-            {
-                setHTTPStatus('400','The '.'Id'.' parameter was passed incorrectly');
-                return;
-            }
-            if(!checkExistPost($postId))
-            {
-                setHTTPStatus('404', "Post not find. Check your postId");
-                return;
-            }
             $dataPostResult = $Link->query("SELECT * FROM post where `id`='$postId'");
             $dataPost = $dataPostResult->fetch_array(MYSQLI_ASSOC);
             if(!is_null($dataPost))
@@ -31,7 +20,19 @@ function getDataConcretePost($formData)
                 $hasLike=false;
                 $hasLikeResult = $Link->query("SELECT `id` FROM `like_account` WHERE `postId`='$postId' AND `accountId`='$accountId'")->fetch_assoc();
                 if(!is_null($hasLikeResult)) $hasLike=true;
-                
+                $commentsQuery = $Link->query("SELECT 
+                    id, 
+                    createTime, 
+                    content, 
+                    modifiedDate, 
+                    deleteDate, 
+                    authorId, 
+                    author, 
+                    subComments
+                FROM comment
+                WHERE `postId`='$postId' and `parentId`=''");
+                $commentsResult = $commentsQuery ->fetch_all(MYSQLI_ASSOC);
+                echo "$Link->error";
                 echo json_encode([
                     "id"=>$dataPost["id"],
                     "createTime"=> $dataPost['createTime'],
@@ -47,6 +48,7 @@ function getDataConcretePost($formData)
                     "commentsCount"=> $dataPost["commentsCount"],
                     "readingTime"=> $dataPost["readingTime"],
                     "tags"=>$tagsPost,
+                    "comments"=>$commentsResult,
                     'hasLike'=>$hasLike
                 ]);
             }

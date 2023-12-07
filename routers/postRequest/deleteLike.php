@@ -1,5 +1,5 @@
 <?php
-function likeDelete()
+function likeDelete($postId)
 {
     global $Link;
     $token = getBearerToken();
@@ -11,17 +11,6 @@ function likeDelete()
         if(!is_null($authorIdData))
         {
             $authorId = $authorIdData["accountID"];
-            $postId = getParams("postId");
-            if(is_null($postId))
-            {
-                setHTTPStatus('400','The '.'postId'.' parameter was passed incorrectly');
-                return;
-            }
-            if(!checkExistPost($postId))
-            {
-                setHTTPStatus('404', "Post not find. Check your postId");
-                return;
-            }
             $checkQueryResult = $Link->query("SELECT `id` FROM `like_account` WHERE `postId`='$postId' AND `accountId`='$authorId'");
             $checkQuery = $checkQueryResult->fetch_assoc();
             if(!is_null($checkQuery))
@@ -30,9 +19,10 @@ function likeDelete()
                 if ($deleteQuery) 
                 {
                     $updatePostQuery = $Link->query("UPDATE post SET likes = likes - 1 WHERE id = '$postId'");
-                    if (!$updatePostQuery) 
+                    $updateAuthorQuery = $Link->query("UPDATE author SET likes = likes - 1 WHERE accountId = '$authorId'");
+                    if (!$updatePostQuery || !$updateAuthorQuery) 
                     {
-                        setHTTPStatus("400","Error when updating values ​​in the post table: ".$Link->error);
+                        setHTTPStatus("400","Error when updating values ​​in the post table or author table: ".$Link->error);
                     }
                 } 
                 else 
@@ -42,7 +32,7 @@ function likeDelete()
             }
             else
             {
-                setHTTPStatus("400","Like already delete or not add else");
+                setHTTPStatus("400","Like already delete or not add else".$Link->error);
             }
             
         } 

@@ -1,5 +1,5 @@
 <?php
-function likePost($formData)
+function likePost($formData, $postId)
 {
     global $Link;
     $token = getBearerToken();
@@ -11,17 +11,6 @@ function likePost($formData)
         if(!is_null($authorIdData))
         {
             
-            $postId = getParams("postId");
-            if(is_null($postId))
-            {
-                setHTTPStatus('400','The '.'postId'.' parameter was passed incorrectly');
-                return;
-            }
-            if(!checkExistPost($postId))
-            {
-                setHTTPStatus('404', "Post not find. Check your postId");
-                return;
-            }
             $authorIdData = $authorIdData["accountID"];
             // Проверяю, есть ли уже лайк от этого пользователя к этому посту
             $checkQueryResult = $Link->query("SELECT `id` FROM `like_account` WHERE `postId`='$postId' AND `accountId`='$authorIdData'");
@@ -32,16 +21,17 @@ function likePost($formData)
                 if ($insertQuery)
                 {
                     // Обновляю значения в таблице post
-                    $updatePostQuery = $Link->query("UPDATE post SET likes = likes + 1, hasLike = 1 WHERE id = '$postId'");
-                    if (!$updatePostQuery) 
+                    $updatePostQuery = $Link->query("UPDATE post SET likes = likes + 1 WHERE id = '$postId'");
+                    $updateAuthorQuery = $Link->query("UPDATE author SET likes = likes + 1 WHERE accountId = '$authorIdData'");
+                    if (!$updatePostQuery || !$updateAuthorQuery) 
                     {
-                        // Обработка ошибки при обновлении значений в таблице post
-                        setHTTPStatus('400', "Ошибка при обновлении значений в таблице post: " . $Link->error);
+                        // Обработка ошибки при обновлении значений в таблице post или author
+                        setHTTPStatus('400', "Error when updating values ​​in the post table: " . $Link->error);
                     }
                 } 
                 else 
                 {
-                    setHTTPStatus('400',"Ошибка при добавлении лайка: " . $Link->error);
+                    setHTTPStatus('400',"Error when adding a like:" . $Link->error);
                 }
             }
             else
