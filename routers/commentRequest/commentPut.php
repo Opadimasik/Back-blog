@@ -1,14 +1,18 @@
 <?php
-function modifieComment($formData)
+function modifieComment($formData, $commentId)
 {
     global $Link;
     $token = getBearerToken();
     if (isTokenValid($token)) 
     {
-        $commentId = trim(getParams("id"));
         if(!checkExistComment($commentId))
         {
             setHTTPStatus("404","There is no such comment that was passed to id. Try checking the data.");
+            return;
+        }
+        if(validateStringNoteLess($formData->content,1))
+        {
+            setHTTPStatus("400","Content very short, minimum leght 1 or it's not there.");
             return;
         }
         $authorAccessQuery = $Link->query("SELECT `authorId` FROM `comment`where `authorId`=

@@ -1,11 +1,10 @@
 <?php
-function deleteComment($formData)
+function deleteComment($formData,$commentId)
 {
     global $Link;
     $token = getBearerToken();
     if (isTokenValid($token)) 
     {
-        $commentId = trim(getParams("id"));
         if(!checkExistComment($commentId))
         {
             setHTTPStatus("404","There is no such comment that was passed to id. Try checking the data.");

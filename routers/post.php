@@ -1,5 +1,4 @@
 <?php
-include_once("helpers/postHelper.php");
 function route($method, $urlData, $formData) 
 { //Обрабатываем запрос.
     global $Link;
@@ -28,16 +27,16 @@ function route($method, $urlData, $formData)
                 likePost($formData, $urlData[1]);
                 return;
             }
-            elseif($urlData[1] == "comment")
+            elseif($urlData[2] == "comment" && checkExistPost($urlData[1]))
             {
                 include_once("commentRequest/commentPost.php");
-                createComment($formData);
+                createComment($formData, $urlData[1]);
                 return;
             }
             else
             {
                 include_once("postRequest/creating.php");
-                createComment($formData);
+                createPost($formData);
                 return;
             }
         case "DELETE":

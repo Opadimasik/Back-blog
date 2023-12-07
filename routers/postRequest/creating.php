@@ -5,37 +5,34 @@ function createPost($formData)
     $token = getBearerToken();
     if (isTokenValid($token)) 
     {
-        if (validateDataPost($formData))
+        if (validateDataPost($formData,$formData->tags))
         {
             $authorIdResult = $Link->query("SELECT `accountID` FROM `token` WHERE value='$token'");
             $authorIdData = $authorIdResult->fetch_assoc();
             if(!is_null($authorIdData))
             {
-                if(checkExistTags($formData->tags))
+                
+                $authorId = $authorIdData['accountID'];
+                $authorResult = $Link->query("SELECT `fullName` FROM `account` where id='$authorId'");
+                $authorData = $authorResult->fetch_assoc();
+                $guid = bin2hex(random_bytes(16));
+                $title = $formData->title;
+                $description = $formData->description;
+                $image = $formData->image;
+                $author = $authorData['fullName'];
+                $addressId = $formData->addressId;
+                $readingTime = $formData->readingTime;
+                $query = "INSERT INTO `post` (`id`, `title`, `description`, `image`, `authorId`, `author`, `addressId`, `readingTime`)
+                        VALUES ('$guid', '$title', '$description', '$image', '$authorId', '$author', '$addressId', '$readingTime')";
+                $postInsertResult = $Link->query($query);
+                if(!$postInsertResult)
                 {
-                    $authorId = $authorIdData['accountID'];
-                    $authorResult = $Link->query("SELECT `fullName` FROM `account` where id='$authorId'");
-                    $authorData = $authorResult->fetch_assoc();
-                    $guid = bin2hex(random_bytes(16));
-                    $title = $formData->title;
-                    $description = $formData->description;
-                    $image = $formData->image;
-                    $author = $authorData['fullName'];
-                    $addressId = $formData->addressId;
-                    $readingTime = $formData->readingTime;
-                    $query = "INSERT INTO `post` (`id`, `title`, `description`, `image`, `authorId`, `author`, `addressId`, `readingTime`)
-                            VALUES ('$guid', '$title', '$description', '$image', '$authorId', '$author', '$addressId', '$readingTime')";
-                    $postInsertResult = $Link->query($query);
-                    if(!$postInsertResult)
-                    {
-                        setHTTPStatus("400","$Link->error");
-                    }
-                    else
-                    {
-                        if(addTagsToPost($guid,$formData->tags)) echo json_encode($guid);
-                    }
+                    setHTTPStatus("400","$Link->error");
                 }
-                else return;
+                else
+                {
+                    if(addTagsToPost($guid,$formData->tags)) echo json_encode($guid);
+                }
             }
             else
             {
@@ -78,10 +75,16 @@ function addTagsToPost($postId,$tags)
         return false;
     }
 }
-function validateDataPost($formData)
+function validateDataPost($formData,$tags)
 {
     $isValidate = true;
     $mesage = array();
+    $isExistTags=checkExistTags($tags);
+    if (!is_null($isExistTags)) {
+        $mesage[] = $isExistTags[1];
+        $isValidate = false;
+        //return false;
+    }
     if(!validateStringNoteLess(strlen($formData->title),5))
         {
             $isValidate = false;
@@ -106,7 +109,7 @@ function validateDataPost($formData)
         if($isValidate == true) return true;
         else 
         {
-            setHTTPStatus("400",$mesage);
+            setHTTPStatus(!is_null($isExistTags)?"404":"400",$mesage);
             return false;
         }
         

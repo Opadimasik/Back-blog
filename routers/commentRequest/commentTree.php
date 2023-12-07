@@ -1,14 +1,9 @@
 <?php
 include_once("helpers/commentHelper.php");
-function getCommentTree()
+function getCommentTree($commentId)
 {
     global $Link;
-    $commentId = trim(getParams("id"));
-    if(!checkExistComment($commentId))
-    {
-        setHTTPStatus("404","There is no such comment that was passed to id. Try checking the data.");
-        return;
-    }
+    
     $commetTreeQuery = $Link->query("
         WITH RECURSIVE CommentTree AS (
             SELECT 

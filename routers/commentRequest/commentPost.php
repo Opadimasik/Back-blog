@@ -1,6 +1,6 @@
 <?php
 include_once("helpers/commentHelper.php");
-function createComment($formData)
+function createComment($formData, $postId)
 {
     global $Link;
     $token = getBearerToken();
@@ -10,8 +10,7 @@ function createComment($formData)
         $authorIdData = $authorIdResult->fetch_assoc();
         if(!is_null($authorIdData))
         {
-            $postId = getParams("id");
-            if(validateComment($formData,$postId))
+            if(validateComment($formData))
             {
                 $authorId = $authorIdData['accountID'];
                 $authorResult = $Link->query("SELECT `fullName` FROM `author` where accountId='$authorId'");
@@ -64,32 +63,44 @@ function createComment($formData)
     }
 }
 
-function validateComment($formData,$postId)
+function validateComment($formData)
 {
     
-    if(is_null($postId))
-    {
-        setHTTPStatus('400','The '.'postId'.' parameter was passed incorrectly');
-        return false;
-    }
-    if(!checkExistPost($postId))
-    {
-        setHTTPStatus('404', "Post not find. Check your postId");
-        return false;
-    }
+    // if(is_null($postId))
+    // {
+    //     setHTTPStatus('400','The '.'postId'.' parameter was passed incorrectly');
+    //     return false;
+    // }
+    // if(!checkExistPost($postId))
+    // {
+    //     setHTTPStatus('404', "Post not find. Check your postId");
+    //     return false;
+    // }
+    $isValidate = true;
+    $mesage = array();
     if(!validateStringNoteLess(strlen($formData->content),1))
     {
-        setHTTPStatus("400","Content very short, minimum leght 1 or it's not there.");
-        return false;
+        $isValidate = false;
+        $mesage[]="Content very short, minimum leght 1 or it's not there.";
+        // setHTTPStatus("400","Content very short, minimum leght 1 or it's not there.");
+        // return false;
     }
     if(!is_null($formData->parentId))
     {
+        $isExistComment = true;
         if(!checkExistComment($formData->parentId))
         {
-            setHTTPStatus("404","There is no such post that was passed to parentId. Try checking the data.");
-            return false;
+            $isValidate= false;
+            $isExistComment = false;
+            $mesage[]="There is no such post that was passed to parentId. Try checking the data.";
+            // setHTTPStatus("404","There is no such post that was passed to parentId. Try checking the data.");
+            // return false;
         }
-        return true;
     }
-    return true;
+    if($isValidate == true) return true;
+    else 
+    {
+        setHTTPStatus(!$isExistComment?"404":"400",$mesage);
+        return false;
+    }
 }
