@@ -135,7 +135,8 @@ function getPosts($communityId,$tags,$sorting,$page,$size,$accountId) {
         $countQuery = "SELECT COUNT(*) AS count FROM ($query) AS filteredPosts";
         $countResult = $Link->query($countQuery);
         $count = $countResult->fetch_assoc()['count'];
-
+        // вычисление общего количества страниц
+        $totalPages = ceil($count / $size);
         // обновление запроса для пагинации
         $query .= " LIMIT $start, $size";
 
@@ -177,7 +178,7 @@ function getPosts($communityId,$tags,$sorting,$page,$size,$accountId) {
 
             $pagination = [
                 "size" => $size,
-                "count" => $count,
+                "count" => "$totalPages",
                 "current" => $page
             ];
 
