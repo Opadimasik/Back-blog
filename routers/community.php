@@ -45,7 +45,9 @@ function route($method, $urlData, $formData)
             }
             elseif($urlData[2] == "subscribe" && !is_null($communityName))
             {
-                
+                include_once("communityRequest/subscribe.php");
+                subscribeCommunity($urlData[1]);
+                return;
             }
         case"DELETE":
             if($urlData[2] == "unsubscribe" && !is_null($communityName))
