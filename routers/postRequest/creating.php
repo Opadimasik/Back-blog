@@ -31,7 +31,14 @@ function createPost($formData, $communityId, $communityName)
                 }
                 else
                 {
-                    if(addTagsToPost($guid,$formData->tags)) echo json_encode($guid);
+                    if(addTagsToPost($guid,$formData->tags)) 
+                    {
+                        if(checkExistAuthor($authorId))
+                        {
+                            echo json_encode($guid);
+                        }
+                    }
+                    
                 }
             }
             else return;
@@ -132,4 +139,46 @@ function validateDataPost($formData,$tags,$communityId)
             return false;
         }
         
+}
+function checkExistAuthor($authorId)
+{
+    global $Link;
+    $query = $Link->query("SELECT `id` from author where `accountId`='$authorId'")->fetch_assoc();
+    if(!is_null($query))
+    {
+        return true;
+    }
+    else
+    {
+        $authorData= $Link->query("SELECT `fullName`, `gender`, `birthDate` FROM `account` WHERE id='$authorId';
+        ")->fetch_assoc();
+        if (!is_null($authorData))
+        {
+            $fullName = $authorData["fullName"];
+            $gender= $authorData["gender"];
+            $birthDate= $authorData["birthDate"];
+            $insertAuthorQuery = $Link->query("
+            INSERT INTO author(`fullName`, `gender`, `accountID`, `birthDate`) 
+            VALUES (
+                '$fullName',
+                '$gender',
+                '$authorId',
+                '$birthDate'
+            )
+            ");
+            if(!$insertAuthorQuery)
+            {
+                setHTTPStatus('500', $Link->error);
+                return false;
+            }
+            return true;
+        }
+        else
+        {
+            setHTTPStatus('500', $Link->error);
+            return false;
+        }
+        
+    }
+
 }
