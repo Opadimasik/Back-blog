@@ -1,27 +1,44 @@
 <?php
-function getDataConcretePost($formData)
+function getPostsData($formData)
 {
     global $Link;
     $token = getBearerToken();
-    if (isTokenValid($token)) 
+    $page = trim(getParams("page"));
+    $size = trim(getParams("size"));
+    $min = trim(getParams("min"));
+    $max = trim(getParams("max"));
+    $sorting = trim(getParams("sorting"));
+    $author = trim(getParams("author"));
+    $onlyMyCommunities = trim(getParams("onlyMyCommunities"));
+    $tags = getParamsForRepetition("tags");
+    if(!validateParams($tags,$author,$min,$max,$sorting,$onlyMyCommunities,$page,$size))
     {
-        $page = trim(getParams("page"));
-        $size = trim(getParams("size"));
-        $min = trim(getParams("min"));
-        $max = trim(getParams("max"));
-        $sorting = trim(getParams("sorting"));
-        $author = trim(getParams("author"));
-        $onlyMyCommunities = trim(getParams("onlyMyCommunities"));
-        $tags = getParamsForRepetition("tags");
-        if(!validateParams($tags,$author,$min,$max,$sorting,$onlyMyCommunities,$page,$size))
+        return;
+    }
+    if (!is_null($token))
+    {
+        if (isTokenValid($token)) 
         {
-            return;
+            $accountIdQuery = $Link->query("SELECT `accountID` FROM `token` WHERE value='$token'");
+            $accountIdData = $accountIdQuery->fetch_assoc();
+            if (!is_null($accountIdData)) 
+            {
+                $accountId = $accountIdData["accountID"];
+                getPosts($tags,$author,$min,$max,$sorting,$onlyMyCommunities,$page,$size,$accountId);
+            }
+            else
+            {
+                setHTTPStatus("500","Error getting accountId".$Link->error);
+            }
         }
-        getPosts($tags,$author,$min,$max,$sorting,$onlyMyCommunities,$page,$size);
+        else
+        {
+            setHTTPStatus("401", "The token has expired.");
+        }
     }
     else
     {
-        setHTTPStatus("401", "The token has expired.");
+        getPosts($tags,$author,$min,$max,$sorting,$onlyMyCommunities,$page,$size,null);
     }
 }
 function validateParams($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $page, $size)
@@ -62,7 +79,7 @@ function validateParams($tags, $author, $min, $max, $sorting, $onlyMyCommunities
 
     return true;
 }
-function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $page, $size) {
+function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $page, $size,$accountId) {
     global $Link;
 
     // база запроса
@@ -101,10 +118,12 @@ function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $pag
             
     }
 
-    // if ($onlyMyCommunities) {
-    //     
-    //     $query .= " AND communityId IN (SELECT communityId FROM community_subscription WHERE accountId = '$accountId')";
-    // }
+    if ($onlyMyCommunities == 'true') {
+        $query .= " AND communityId IN (SELECT communityId FROM community_role WHERE userId = '$accountId' AND `role` IN ('Subscriber', 'Administrator'))";
+    } elseif($onlyMyCommunities == 'false') {
+        $query .= " AND communityId NOT IN (SELECT communityId FROM community_role WHERE userId = '$accountId' AND `role` IN ('Subscriber', 'Administrator'))";
+    }
+    
 
     // выполнение запроса
     $result = $Link->query($query);
@@ -132,7 +151,13 @@ function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $pag
 
                 $tagPostResult = $Link->query("SELECT * FROM `tag` WHERE `id` IN (SELECT `tagId` FROM tag_post WHERE `postId`='$postId')");
                 $tagsPost = $tagPostResult->fetch_all(MYSQLI_ASSOC);
-
+                $hasLike=false;
+                if (!is_null($accountId))
+                {
+                    $hasLikeResult = $Link->query("SELECT `id` FROM `like_account` WHERE `postId`='$postId' AND `accountId`='$accountId'")->fetch_assoc();
+                    if(!is_null($hasLikeResult)) $hasLike=true;
+                }
+                if(!is_null($hasLikeResult)) $hasLike=true;
                 $commentsQuery = $Link->query("SELECT 
                     id, 
                     createTime, 

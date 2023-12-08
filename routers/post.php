@@ -16,7 +16,7 @@ function route($method, $urlData, $formData)
             else
             {
                 include_once("postRequest/postsGet.php");
-                getDataConcretePost($formData);
+                getPostsData($formData);
                 return;
             }
             
