@@ -118,13 +118,11 @@ function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $pag
             
     }
 
-    if ($onlyMyCommunities == 'true') {
-        $query .= " AND communityId IN (SELECT communityId FROM community_role WHERE userId = '$accountId' AND `role` IN ('Subscriber', 'Administrator'))";
-    } elseif($onlyMyCommunities == 'false') {
-        $query .= " AND communityId NOT IN (SELECT communityId FROM community_role WHERE userId = '$accountId' AND `role` IN ('Subscriber', 'Administrator'))";
+    if ($onlyMyCommunities == 'true' && !is_null($accountId)) {
+        $query .= " AND `communityId` IN (SELECT `communityId` FROM community_role WHERE `userId` = '$accountId' AND `role` IN ('Subscriber', 'Administrator'))";
+    } elseif ($onlyMyCommunities == 'false' && !is_null($accountId)) {
+        $query .= " AND (`communityId` IS NULL OR `communityId` NOT IN (SELECT `communityId` FROM community_role WHERE `userId` = '$accountId' AND `role` IN ('Subscriber', 'Administrator')))";
     }
-    
-
     // выполнение запроса
     $result = $Link->query($query);
 
@@ -136,12 +134,12 @@ function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $pag
         $countQuery = "SELECT COUNT(*) AS count FROM ($query) AS filteredPosts";
         $countResult = $Link->query($countQuery);
         $count = $countResult->fetch_assoc()['count'];
-
+        // вычисление общего количества страниц
+        $totalPages = ceil($count / $size);
         // обновление запроса для пагинации
         $query .= " LIMIT $start, $size";
 
         $result = $Link->query($query);
-
         if ($result) {
             $posts = $result->fetch_all(MYSQLI_ASSOC);
 
@@ -157,7 +155,6 @@ function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $pag
                     $hasLikeResult = $Link->query("SELECT `id` FROM `like_account` WHERE `postId`='$postId' AND `accountId`='$accountId'")->fetch_assoc();
                     if(!is_null($hasLikeResult)) $hasLike=true;
                 }
-                if(!is_null($hasLikeResult)) $hasLike=true;
                 $commentsQuery = $Link->query("SELECT 
                     id, 
                     createTime, 
@@ -177,7 +174,7 @@ function getPosts($tags, $author, $min, $max, $sorting, $onlyMyCommunities, $pag
 
             $pagination = [
                 "size" => $size,
-                "count" => $count,
+                "count" => "$totalPages",
                 "current" => $page
             ];
 
