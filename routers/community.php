@@ -47,7 +47,9 @@ function route($method, $urlData, $formData)
         case"DELETE":
             if($urlData[2] == "unsubscribe" && checkExistCommunity($urlData[1]))
             {
-                
+                include_once("communityRequest/unsubscribe.php");
+                unsubscribeCommunity($urlData[1]);
+                return;
             }
         default:
             setHTTPStatus("404", "If you tried to use the community id, then you were probably mistaken) the server cannot find it or the request is incorrect");
