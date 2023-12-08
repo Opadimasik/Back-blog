@@ -16,7 +16,9 @@ function route($method, $urlData, $formData)
             }
             elseif($urlData[2] == "post" && !is_null($communityName))
             {
-                
+                include_once("communityRequest/getPostsCommunity.php");
+                getPostsCommunity($urlData[1]);
+                return;
             }
             elseif($urlData[2] == "role" && !is_null($communityName))
             {
