@@ -4,6 +4,7 @@ function route($method, $urlData, $formData)
 { //Обрабатываем запрос.
     global $Link;
     include_once("helpers/communityHelper.php");
+    $communityName = getCommunityName($urlData[1]);
     switch ($method) 
     {
         case "GET":
@@ -13,17 +14,17 @@ function route($method, $urlData, $formData)
                 getUserCommuninty();
                 return;
             }
-            elseif($urlData[2] == "post" && checkExistCommunity($urlData[1]))
+            elseif($urlData[2] == "post" && !is_null($communityName))
             {
                 
             }
-            elseif($urlData[2] == "role" && checkExistCommunity($urlData[1]))
+            elseif($urlData[2] == "role" && !is_null($communityName))
             {
                 include_once("communityRequest/getRole.php");
                 getUserRole($urlData[1]);
                 return;
             }
-            elseif(checkExistCommunity($urlData[1]))
+            elseif(!is_null($communityName))
             {
                 include_once("communityRequest/getById.php");
                 getConcreteCommunity($urlData[1]);
@@ -36,16 +37,18 @@ function route($method, $urlData, $formData)
                 return;
             }
         case "POST":
-            if($urlData[2] == "post" && checkExistCommunity($urlData[1]))
+            if($urlData[2] == "post" && !is_null($communityName))
             {
-                
+                include_once("postRequest/creating.php");
+                createPost($formData,$urlData[1],$communityName);
+                return;
             }
-            elseif($urlData[2] == "subscribe" && checkExistCommunity($urlData[1]))
+            elseif($urlData[2] == "subscribe" && !is_null($communityName))
             {
                 
             }
         case"DELETE":
-            if($urlData[2] == "unsubscribe" && checkExistCommunity($urlData[1]))
+            if($urlData[2] == "unsubscribe" && !is_null($communityName))
             {
                 
             }

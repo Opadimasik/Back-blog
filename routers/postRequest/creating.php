@@ -1,20 +1,20 @@
 <?php
-function createPost($formData)
+function createPost($formData, $communityId, $communityName)
 {
     global $Link;
     $token = getBearerToken();
     if (isTokenValid($token)) 
     {
-        if (validateDataPost($formData,$formData->tags))
+       
+        $authorIdResult = $Link->query("SELECT `accountID` FROM `token` WHERE value='$token'");
+        $authorIdData = $authorIdResult->fetch_assoc();
+        if(!is_null($authorIdData))
         {
-            $authorIdResult = $Link->query("SELECT `accountID` FROM `token` WHERE value='$token'");
-            $authorIdData = $authorIdResult->fetch_assoc();
-            if(!is_null($authorIdData))
+            $authorId = $authorIdData['accountID'];
+            $authorResult = $Link->query("SELECT `fullName` FROM `account` where id='$authorId'");
+            $authorData = $authorResult->fetch_assoc();
+            if (validateDataPost($formData,$formData->tags, $communityId))
             {
-                
-                $authorId = $authorIdData['accountID'];
-                $authorResult = $Link->query("SELECT `fullName` FROM `account` where id='$authorId'");
-                $authorData = $authorResult->fetch_assoc();
                 $guid = bin2hex(random_bytes(16));
                 $title = $formData->title;
                 $description = $formData->description;
@@ -22,8 +22,8 @@ function createPost($formData)
                 $author = $authorData['fullName'];
                 $addressId = $formData->addressId;
                 $readingTime = $formData->readingTime;
-                $query = "INSERT INTO `post` (`id`, `title`, `description`, `image`, `authorId`, `author`, `addressId`, `readingTime`)
-                        VALUES ('$guid', '$title', '$description', '$image', '$authorId', '$author', '$addressId', '$readingTime')";
+                $query = "INSERT INTO `post` (`id`, `title`, `description`, `image`, `authorId`, `author`, `addressId`, `readingTime`,`communityName`,`communityId`)
+                        VALUES ('$guid', '$title', '$description', '$image', '$authorId', '$author', '$addressId', '$readingTime','$communityName','$communityId')";
                 $postInsertResult = $Link->query($query);
                 if(!$postInsertResult)
                 {
@@ -34,14 +34,14 @@ function createPost($formData)
                     if(addTagsToPost($guid,$formData->tags)) echo json_encode($guid);
                 }
             }
-            else
-            {
-                setHTTPStatus("400","Account id can not be find");
-                return;
-            }
-            
+            else return;
         }
-        else return;
+        else
+        {
+            setHTTPStatus("400","Account id can not be find");
+            return;
+        }
+            
         
     }
     else
@@ -75,7 +75,7 @@ function addTagsToPost($postId,$tags)
         return false;
     }
 }
-function validateDataPost($formData,$tags)
+function validateDataPost($formData,$tags,$communityId)
 {
     $isValidate = true;
     $mesage = array();
@@ -106,10 +106,29 @@ function validateDataPost($formData,$tags)
             // setHTTPStatus("400","This is not an image or the image is not available.");
             // return false;
         }
+        $isForbidden = true;
+        if (!is_null($communityId))
+        {
+            include_once("routers/communityRequest/getRole.php");
+            $roleInCommutity = getUserRole($communityId,true);
+            if ($roleInCommutity != "Administrator")
+            {
+                $isValidate = false;
+                $isForbidden = false;
+                if($roleInCommutity == "Subscriber")
+                {
+                    $mesage[] = "This user is a community subscriber, he cannot add posts to the group";
+                }
+                else $mesage[] = $roleInCommutity[1];
+            }
+        }
         if($isValidate == true) return true;
         else 
         {
-            setHTTPStatus(!is_null($isExistTags)?"404":"400",$mesage);
+            if(!is_null($isExistTags))setHTTPStatus("404",$mesage);
+            elseif(!$isForbidden)setHTTPStatus("403",$mesage);
+            else setHTTPStatus("400",$mesage);
+            //setHTTPStatus(!is_null($isExistTags)?"404":!$isForbidden?"403":"400",$mesage);
             return false;
         }
         

@@ -36,7 +36,7 @@ function route($method, $urlData, $formData)
             else
             {
                 include_once("postRequest/creating.php");
-                createPost($formData);
+                createPost($formData,null,null);
                 return;
             }
         case "DELETE":
