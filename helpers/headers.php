@@ -32,5 +32,3 @@ function setHTTPStatus($status="200",$message=null)
         echo json_encode(['message'=>$message]);
     }
 }
-
-?>

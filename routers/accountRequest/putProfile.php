@@ -1,6 +1,7 @@
 <?php
 function accountPutProfile($formData)
 {
+    $mesage = array();
     global $Link;
     $token = getBearerToken();
     if (isTokenValid($token)) 
@@ -10,18 +11,38 @@ function accountPutProfile($formData)
         {
             $row = $result->fetch_assoc();
             $accountID = $row['accountID'];
-
-            foreach ($formData as $key => $rowValue)
+            $allowedFields = ["email", "fullName", "birthDate", "gender", "phoneNumber"];
+            $query = "UPDATE `account` SET ";
+            foreach ($formData as $key => $rowValue) 
             {
-                $Link->query("UPDATE `account` SET `$key`='$rowValue' WHERE id='$accountID'");
-                if ($Link->error != "")
+                if(validateDataForPut($key,$rowValue,$mesage))
                 {
-                    setHTTPStatus("400", $Link->error);
-                }
+                    if(in_array($key,$allowedFields))
+                    {
+                        $query .= "`$key`='$rowValue', ";  
+                    }
+                    else
+                    {
+                        $mesage[] = "Cannot change field '$key'";
+                    }
+                }              
             }
-        } else 
+            $query = rtrim($query, ', '); // Удаляем последнюю запятую
+            $query .= " WHERE id='$accountID'";
+
+            $Link->query($query);
+            if ($Link->error != "") 
+            {
+                $mesage[] = $Link->error;
+            }
+            if(!empty($mesage))
+            {
+                setHTTPStatus("400",$mesage);
+            }
+        } 
+        else 
         {
-            setHTTPStatus("401");
+            setHTTPStatus("401", "Unauthorized user");
         }
     }
     else
@@ -30,4 +51,29 @@ function accountPutProfile($formData)
     }
 }
 
-?>
+function validateDataForPut($key,$value,&$mesage)
+{
+    switch ($key) {
+        case "email":
+            if (!validateStringNoteLess(strlen($value),1) || !validateEmail($value)) 
+            {
+                $mesage[] = "Email very short, minimum leght 1. Or this email not correct";
+                return false;
+            }
+            break;
+        case "fullName":
+            if (!validateStringNoteLess(strlen($value), 1)) 
+            {
+                $mesage[] = "FullName very short, minimum leght 1";
+                return false;
+            }
+            break;
+        case "gender":
+            if (!validateGender($value)) {
+                $mesage[] =  "Invalid gender value";
+                return false;
+            }
+            break;
+    }
+    return true;
+}

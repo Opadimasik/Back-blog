@@ -21,5 +21,3 @@ function accountLogout()
         setHTTPStatus("401", "The token has expired.");
     }
 }
-
-?>
