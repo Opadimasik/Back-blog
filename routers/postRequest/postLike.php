@@ -22,7 +22,8 @@ function likePost($formData, $postId)
                 {
                     // Обновляю значения в таблице post
                     $updatePostQuery = $Link->query("UPDATE post SET likes = likes + 1 WHERE id = '$postId'");
-                    $updateAuthorQuery = $Link->query("UPDATE author SET likes = likes + 1 WHERE accountId = '$authorIdData'");
+                    $authorPost = $Link->query("SELECT authorId FROM post WHERE id = '$postId'")->fetch_assoc()["authorId"];
+                    $updateAuthorQuery = $Link->query("UPDATE author SET likes = likes + 1 WHERE accountId = '$authorPost'");
                     if (!$updatePostQuery || !$updateAuthorQuery) 
                     {
                         // Обработка ошибки при обновлении значений в таблице post или author

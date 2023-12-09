@@ -35,7 +35,16 @@ function createPost($formData, $communityId, $communityName)
                     {
                         if(checkExistAuthor($authorId))
                         {
-                            echo json_encode($guid);
+                            $authorUpdate = $Link->query("UPDATE author SET posts=posts+1 WHERE accountID='$authorId'");
+                            if ($authorUpdate)
+                            {
+                                echo json_encode($guid);
+                            }
+                            else 
+                            {
+                                setHTTPStatus('500', $Link->error);
+                            }
+                            
                         }
                     }
                     
@@ -48,8 +57,6 @@ function createPost($formData, $communityId, $communityName)
             setHTTPStatus("400","Account id can not be find");
             return;
         }
-            
-        
     }
     else
     {
@@ -126,7 +133,7 @@ function validateDataPost($formData,$tags,$communityId)
                 {
                     $mesage[] = "This user is a community subscriber, he cannot add posts to the group";
                 }
-                else $mesage[] = $roleInCommutity[1];
+                else $mesage[] = "Error getting role from community, please check if token is correct";
             }
         }
         if($isValidate == true) return true;

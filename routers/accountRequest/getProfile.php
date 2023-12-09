@@ -3,26 +3,16 @@ function accountGetProfile()
 {
     global $Link;
     $token = getBearerToken();
-    if(isTokenValid($token))
-    {
-        $currentTime = date("Y-m-d H:i:s");
-        $result = $Link->query("SELECT `accountID` FROM `token` WHERE value='$token'");
+    $result = $Link->query("SELECT `accountID` FROM `token` WHERE value='$token'");
 
-        if ($result->num_rows > 0) 
-        {
-            $row = $result->fetch_assoc();
-            $accountID = $row['accountID'];
-
-            $accountData = $Link->query("SELECT * FROM `account` WHERE id='$accountID'");
-            echo json_encode($accountData->fetch_assoc());
-        } 
-        else 
-        {
-            setHTTPStatus("401");
-        }
-    }
-    else
+    if ($result->num_rows > 0) 
     {
-        setHTTPStatus("401", "The token has expired.");
+        $row = $result->fetch_assoc();
+        $accountID = $row['accountID'];
+        $accountData = $Link->query("SELECT fullName,email,birthDate,gender,phoneNumber,id,created FROM `account` WHERE id='$accountID'");
+        echo json_encode($accountData->fetch_assoc());
+    } else 
+    {
+        setHTTPStatus("401", "Account is not authorized, try logging in again");
     }
 }

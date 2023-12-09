@@ -10,7 +10,7 @@ function getUserRole($communityId,$isCheck=false)
         {
             $row = $result->fetch_assoc();
             $accountID = $row['accountID'];
-            $id = "$communityId"."\r\n";
+            $id = "$communityId";
             $commutiyRoleUserQuery = $Link->query("
             SELECT MIN(`role`) as role
             FROM community_role

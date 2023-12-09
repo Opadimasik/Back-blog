@@ -28,6 +28,5 @@ function route($method, $urlData, $formData)
             include_once("accountRequest/putProfile.php");
             accountPutProfile($formData);
             return;
-
     }
 }

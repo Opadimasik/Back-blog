@@ -32,7 +32,7 @@ function route($method, $urlData, $formData)
                 getConcreteCommunity($urlData[1]);
                 return;
             }
-            else
+            elseif(is_null($urlData[1]))
             {
                 include_once("communityRequest/getList.php");
                 getListOfCommunuty();

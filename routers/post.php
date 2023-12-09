@@ -12,7 +12,7 @@ function route($method, $urlData, $formData)
                 getDataConcretePost($formData, $urlData[1]);
                 return;
             }
-            else
+            elseif(is_null($urlData[1]))
             {
                 include_once("postRequest/postsGet.php");
                 getPostsData($formData);
@@ -33,7 +33,7 @@ function route($method, $urlData, $formData)
                 createComment($formData, $urlData[1]);
                 return;
             }
-            else
+            elseif(is_null($urlData[1]))
             {
                 include_once("postRequest/creating.php");
                 createPost($formData,null,null);
