@@ -39,6 +39,12 @@ function createComment($formData, $postId)
                     setHTTPStatus("400","Problem with creating comment:"."$Link->error");
                     return;
                 }
+                $countCommentQuery = $Link->query("UPDATE post SET commentsCount = commentsCount + 1 WHERE id = '$postId'");
+                if(!$countCommentQuery)
+                {
+                    setHTTPStatus("400","$Link->error");
+                    return;
+                }
                 if (!is_null($parentId))
                 {
                     $subCommentQuery = $Link->query("UPDATE comment SET subComments = subComments + 1 WHERE id = '$parentId'");
